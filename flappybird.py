@@ -158,8 +158,13 @@ def init_display():
 start = False
 init_display()
 
-while not game_over:
+def begin_music():
+    pygame.mixer.music.load("media/song.mp3")
+    pygame.mixer.Channel(2).set_volume(0.02)
+    pygame.mixer.Channel(2).play(pygame.mixer.Sound('media/song.mp3'))
 
+begin_music()
+while not game_over:
     if start:
         draw_loop()    
 
