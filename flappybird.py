@@ -9,6 +9,7 @@ screen = pygame.display.set_mode(size)
 pygame.init()
 BIRD_IMAGE = pygame.image.load('images/bird.png').convert_alpha()
 PIPE_IMAGE = pygame.image.load('images/pipe.png').convert_alpha()
+PIPE_TOP_IMAGE = pygame.image.load('images/pipe_top.png').convert_alpha()
 BACKGROUND = pygame.image.load('images/background.png').convert()
 SCALE = 50
 BIRD_WIDTH = SCALE
@@ -18,8 +19,8 @@ GAP_HEIGHT = 120
 PIPE_SPEED = 5
 SCORE = 0
 MAX_SCORE = 0
-font = pygame.font.SysFont("Arial", 75)
-font2 = pygame.font.SysFont("Arial", 40)
+font = pygame.font.SysFont("Verdana", 75)
+font2 = pygame.font.SysFont("Verdana", 28)
 g = 1.2
 game_over = False
 
@@ -27,6 +28,9 @@ def increase_score():
     global SCORE
     global MAX_SCORE
     SCORE += 1
+    pygame.mixer.music.load("media/point.mp3")
+    pygame.mixer.Channel(3).set_volume(0.01)
+    pygame.mixer.Channel(3).play(pygame.mixer.Sound('media/point.mp3'))
     if SCORE > MAX_SCORE:
         MAX_SCORE = SCORE
 
@@ -87,7 +91,7 @@ def get_pipe_height():
     return int(random.randint(GAP_HEIGHT + 50, 600 - (GAP_HEIGHT + 50)))
 
 def detect_collision(b, pipe):
-    if ((b.x + BIRD_WIDTH >= pipe.x and b.x <= pipe.x + PIPE_WIDTH) and (b.y + BIRD_HEIGHT/2 <= (pipe.top_height - 10) or b.y + BIRD_HEIGHT/2 >= 600 - pipe.bot_height) and not pipe.passed):
+    if ((b.x + BIRD_WIDTH >= pipe.x and b.x <= pipe.x + PIPE_WIDTH) and (b.y + BIRD_HEIGHT/2 <= (pipe.top_height - 10) or b.y + BIRD_HEIGHT >= 600 - pipe.bot_height) and not pipe.passed):
         return True
 
 class Pipe(pygame.sprite.Sprite):
@@ -96,15 +100,19 @@ class Pipe(pygame.sprite.Sprite):
         self.x = width
         self.bot_height = get_pipe_height()
         self.top_height = height - self.bot_height - GAP_HEIGHT
-        self.bot_image = pygame.transform.scale(PIPE_IMAGE, (PIPE_WIDTH, self.bot_height))
-        self.top_image = pygame.transform.rotozoom(pygame.transform.scale(PIPE_IMAGE, (PIPE_WIDTH, self.top_height)), 180, 1)
+        self.bot_image = pygame.transform.scale(PIPE_IMAGE, (PIPE_WIDTH, self.bot_height - 50))
+        self.bot_image_top = pygame.transform.scale(PIPE_TOP_IMAGE, (PIPE_WIDTH + 3, 50))
+        self.top_image = pygame.transform.rotozoom(pygame.transform.scale(PIPE_IMAGE, (PIPE_WIDTH, self.top_height - 50)), 180, 1)
+        self.top_image_top = pygame.transform.rotozoom(pygame.transform.scale(PIPE_TOP_IMAGE, (PIPE_WIDTH + 3, 50)), 180, 1)
         self.passed = False
         self.dead = False
         self.scored = False
 
     def draw(self): 
         screen.blit(self.bot_image,(self.x, height - self.bot_height))
+        screen.blit(self.bot_image_top, (self.x - 1.5, height - self.bot_height))
         screen.blit(self.top_image,(self.x, -10))
+        screen.blit(self.top_image_top, (self.x - 1.5, self.top_height - 65))
         self.move()
     
     def move(self):
@@ -163,7 +171,7 @@ def begin_music():
     pygame.mixer.Channel(2).set_volume(0.02)
     pygame.mixer.Channel(2).play(pygame.mixer.Sound('media/song.mp3'))
 
-begin_music()
+#begin_music()
 while not game_over:
     if start:
         draw_loop()    
@@ -176,6 +184,12 @@ while not game_over:
             if event.type == pygame.MOUSEBUTTONDOWN:
                     start = True
                     bird.start()
+            
+            if event.type == pygame.KEYDOWN:
+                if  event.key == pygame.K_SPACE:
+                    start = True
+                    bird.start()
+
     else:
         pygame.mixer.music.load("media/dead.mp3")
         pygame.mixer.Channel(1).set_volume(0.1)
