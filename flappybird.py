@@ -191,9 +191,6 @@ while not game_over:
                     bird.start()
 
     else:
-        pygame.mixer.music.load("media/dead.mp3")
-        pygame.mixer.Channel(1).set_volume(0.1)
-        pygame.mixer.Channel(1).play(pygame.mixer.Sound('media/dead.mp3'))
         SCORE = 0
         bird = Bird()
         pipes = (Pipe(), Pipe(), Pipe())
